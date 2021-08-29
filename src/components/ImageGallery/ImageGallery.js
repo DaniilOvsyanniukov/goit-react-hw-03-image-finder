@@ -27,14 +27,18 @@ class ImageGallery extends Component {
           }
           return Promise.reject(new Error(`no images on request`));
         })
-        .then((images) =>
-          this.setState({
-            images: images.hits,
-            status: "resolved",
-            page: 1,
-            searchbar: nextSearch,
-          })
-        )
+        .then((images) => {
+          if (images.total === 0) {
+            this.setState({ error: "No any picture", status: "rejected" });
+          } else {
+            this.setState({
+              images: images.hits,
+              status: "resolved",
+              page: 1,
+              searchbar: nextSearch,
+            });
+          }
+        })
         .catch((error) => this.setState({ error, status: "rejected" }));
     }
   }
@@ -117,7 +121,7 @@ class ImageGallery extends Component {
       );
     }
     if (status === "rejected") {
-      return <p>Здесь будет {this.state.error}</p>;
+      return <p>{this.state.error}</p>;
     }
   }
 }
