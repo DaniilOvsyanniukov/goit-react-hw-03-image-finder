@@ -5,6 +5,7 @@ import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import Loader from "react-loader-spinner";
 import Modal from "../Modal/Modal";
 import s from "./ImageGallery.module.css";
+import imageApi from "../services";
 
 class ImageGallery extends Component {
   state = {
@@ -14,19 +15,12 @@ class ImageGallery extends Component {
   componentDidUpdate(prevProps) {
     const prevSearch = prevProps.searchbar;
     const nextSearch = this.props.searchbar;
-    const key = `22330478-3bd9f5a2d8db4972b1e40fa44`;
+    const page = 1;
     if (prevSearch !== nextSearch) {
-      this.setState({ status: "pending" });
+      this.setState({ status: "pending", page: 1 });
 
-      fetch(
-        `https://pixabay.com/api/?q=${nextSearch}&page=1&key=${key}&image_type=photo&orientation=horizontal&per_page=12`
-      )
-        .then((response) => {
-          if (response.ok) {
-            return response.json();
-          }
-          return Promise.reject(new Error(`no images on request`));
-        })
+      imageApi
+        .fatchImage(nextSearch, page)
         .then((images) => {
           if (images.total === 0) {
             this.setState({ error: "No any picture", status: "rejected" });
@@ -43,18 +37,10 @@ class ImageGallery extends Component {
     }
   }
   loadMore = () => {
-    const key = `22330478-3bd9f5a2d8db4972b1e40fa44`;
     const page = this.state.page + 1;
 
-    fetch(
-      `https://pixabay.com/api/?q=${this.state.searchbar}&page=${page}&key=${key}&image_type=photo&orientation=horizontal&per_page=12`
-    )
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        }
-        return Promise.reject(new Error(`no images on request`));
-      })
+    imageApi
+      .fatchImage(this.state.searchbar, page)
       .then((images) =>
         this.setState((prevState) => ({
           images: [...prevState.images, ...images.hits],
@@ -69,10 +55,10 @@ class ImageGallery extends Component {
       })
       .catch((error) => this.setState({ error }));
   };
-  modalOpen = (e) => {
+  modalOpen = (moduleUrl, moduleAlt) => {
     this.setState({
-      largeImageURL: e.target.dataset.source,
-      alt: e.target.alt,
+      largeImageURL: moduleUrl,
+      alt: moduleAlt,
     });
   };
   modalClose = () => {
@@ -110,13 +96,13 @@ class ImageGallery extends Component {
             );
           })}
           <Button onClick={this.loadMore} />
-          {this.state.largeImageURL ? (
+          {this.state.largeImageURL && (
             <Modal
               largeImageURL={this.state.largeImageURL}
               alt={this.state.alt}
               onClick={this.modalClose}
             />
-          ) : null}
+          )}
         </ul>
       );
     }

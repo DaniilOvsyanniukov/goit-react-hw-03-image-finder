@@ -3,13 +3,13 @@ import s from "./ImageGalleryItem.module.css";
 
 const ImageGalleryItem = ({ webformatURL, largeImageURL, tags, modalOpen }) => {
   return (
-    <li className={s.ImageGalleryItem} onClick={modalOpen}>
-      <img
-        src={webformatURL}
-        alt={tags}
-        className={s.ImageGalleryItemImage}
-        data-source={largeImageURL}
-      />
+    <li
+      className={s.ImageGalleryItem}
+      onClick={() => {
+        modalOpen(largeImageURL, tags);
+      }}
+    >
+      <img src={webformatURL} alt={tags} className={s.ImageGalleryItemImage} />
     </li>
   );
 };
